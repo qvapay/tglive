@@ -16,7 +16,7 @@ Config por variables de entorno (ver keeper.env.example):
   TG_SESSION               archivo de sesión ¡acceso total a la cuenta!
   TG_PRIVACY               public | close_friends              (default: public)
   CHECK_INTERVAL           segundos entre comprobaciones       (default: 30)
-  ROTATE_BEFORE_EXPIRE     segundos antes de expire_date para rotar el live; 0 = no rotar (default: 0)
+  ROTATE_BEFORE_EXPIRE     segundos antes de expire_date para rotar el live; 0 = no rotar (default: 120)
   STREAM_SERVICE           unit de systemd a reiniciar tras crear un live (default: tgstream.service; vacío = no reiniciar)
   NOTIFY                   saved = avisar en Mensajes guardados | off   (default: saved)
 """
@@ -46,7 +46,7 @@ def env(name, default=None, required=False):
 PEER = env("TG_PEER", "me")
 PRIVACY = env("TG_PRIVACY", "public")
 CHECK_INTERVAL = int(env("CHECK_INTERVAL", "30"))
-ROTATE_BEFORE_EXPIRE = int(env("ROTATE_BEFORE_EXPIRE", "0"))
+ROTATE_BEFORE_EXPIRE = int(env("ROTATE_BEFORE_EXPIRE", "120"))
 STREAM_SERVICE = env("STREAM_SERVICE", "tgstream.service")
 NOTIFY = env("NOTIFY", "saved")
 

@@ -126,7 +126,7 @@ Chrome la abre con un viewport de **540x960** a escala 2 (= 1080x1920), con User
 | `TG_PEER` | `me` | `@canal` o `me` |
 | `TG_SESSION` | `/var/lib/tgstream-keeper/keeper` | Sesión de tu usuario. **Acceso total a la cuenta** |
 | `CHECK_INTERVAL` | `30` | Segundos entre comprobaciones |
-| `ROTATE_BEFORE_EXPIRE` | `0` | Segundos antes del `expire_date` del live para rotarlo. `0` = solo recrear si muere |
+| `ROTATE_BEFORE_EXPIRE` | `120` | Segundos antes del `expire_date` del live para rotarlo (el live muere a las 4 h). `0` = solo recrear cuando muera |
 | `STREAM_SERVICE` | `tgstream.service` | Lo que se reinicia tras crear un live |
 | `NOTIFY` | `saved` | Avisos en Mensajes guardados, u `off` |
 
@@ -158,6 +158,7 @@ Con el live al aire, nunca reescribas un script de `/opt/tgstream` encima: bash 
 | `Owner of /tmp/.X11-unix should be set to root` | Xvfb corre sin root | `deploy/x11-unix.tmpfiles.conf` |
 | `Input/output error` contra Telegram | Otra conexión usando la misma key | Una transmisión por key |
 | `CAPTION_NOT_EMPTY` | Los Live Stories no aceptan texto | Sin caption |
+| El live muere justo a las 4 h | Telegram lo cierra en el `expire_date` (inicio + 4 h) | `ROTATE_BEFORE_EXPIRE=120`: el keeper lo rota 2 min antes |
 | El código de login no llega | Filtro antiabuso con apps de terceros | Login por QR |
 
 ## Licencia
