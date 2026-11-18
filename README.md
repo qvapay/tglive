@@ -159,6 +159,7 @@ Con el live al aire, nunca reescribas un script de `/opt/tgstream` encima: bash 
 | `Input/output error` contra Telegram | Otra conexión usando la misma key | Una transmisión por key |
 | `CAPTION_NOT_EMPTY` | Los Live Stories no aceptan texto | Sin caption |
 | El live muere justo a las 4 h | Telegram lo cierra en el `expire_date` (inicio + 4 h) | `ROTATE_BEFORE_EXPIRE=120`: el keeper lo rota 2 min antes |
+| El keeper sigue corriendo pero ya no crea el live; el log repite `Cannot send requests while disconnected` | Un corte de red y Telethon se rinde, dejando el cliente desconectado | El keeper reconecta solo y, tras 10 errores seguidos (`MAX_FAILS`), sale para que systemd lo reinicie |
 | El código de login no llega | Filtro antiabuso con apps de terceros | Login por QR |
 
 ## Licencia

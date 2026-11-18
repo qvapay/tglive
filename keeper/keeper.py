@@ -49,6 +49,7 @@ CHECK_INTERVAL = int(env("CHECK_INTERVAL", "30"))
 ROTATE_BEFORE_EXPIRE = int(env("ROTATE_BEFORE_EXPIRE", "120"))
 STREAM_SERVICE = env("STREAM_SERVICE", "tgstream.service")
 NOTIFY = env("NOTIFY", "saved")
+MAX_FAILS = int(env("MAX_FAILS", "10"))
 
 
 def make_client():
@@ -207,8 +208,13 @@ async def cmd_run():
     log.info("vigilando %s cada %ss (rotar %ss antes de expirar: %s)",
              PEER, CHECK_INTERVAL, ROTATE_BEFORE_EXPIRE, "sí" if ROTATE_BEFORE_EXPIRE else "no")
     last_error = None
+    fails = 0
     while True:
         try:
+            if not c.is_connected():
+                # Telethon se rinde tras unos reintentos y deja el cliente muerto
+                log.warning("desconectado de Telegram, reconectando")
+                await c.connect()
             s = await get_live(c, peer)
             if not s:
                 if await start_live(c, peer):
@@ -223,6 +229,7 @@ async def cmd_run():
                         restart_stream()
                         await notify(c, f"live {s.id} rotado antes de expirar")
             last_error = None
+            fails = 0
         except errors.FloodWaitError as e:
             log.warning("FLOOD_WAIT de %ss", e.seconds)
             await asyncio.sleep(e.seconds + 1)
@@ -232,6 +239,11 @@ async def cmd_run():
         except Exception as e:
             msg = f"error: {type(e).__name__}: {e}"
             log.error(msg)
+            fails += 1
+            if fails >= MAX_FAILS:
+                # mejor morir y que systemd nos levante limpios que quedarnos en bucle
+                log.error("%s errores seguidos, saliendo para que systemd reinicie", fails)
+                sys.exit(1)
             if msg != last_error:  # avisar una vez por error distinto, no cada 30 s
                 await notify(c, msg)
                 last_error = msg
