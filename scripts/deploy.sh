@@ -10,7 +10,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 echo "==> Subiendo a $HOST:~/$REMOTE_DIR"
 rsync -av --delete \
   --exclude .git --exclude node_modules --exclude .venv --exclude .env --exclude .DS_Store \
-  --exclude music --exclude '*.session' --exclude '*.mp4' --exclude '*.png' \
+  --exclude music --exclude reels --exclude '*.session' --exclude '*.mp4' --exclude '*.png' \
   "$ROOT/" "$HOST:$REMOTE_DIR/"
 
 echo "==> Instalando"

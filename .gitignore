@@ -4,6 +4,7 @@ node_modules/
 *.session
 *.session-journal
 music/
+reels/
 *.mp4
 *.mp3
 *.png

@@ -53,10 +53,10 @@ log() { echo "tgstream: $*" >&2; }
 case "$MODE" in shot|rec|live) ;; *) echo "Uso: $0 shot|rec|live" >&2; exit 2 ;; esac
 
 # --- Limpieza: al salir por lo que sea, matar todo lo que arrancamos ---
-XPID=""; CPID=""; MPID=""
+XPID=""; CPID=""; MPID=""; DPID=""
 cleanup() {
   # shellcheck disable=SC2086
-  kill $MPID $CPID $XPID 2>/dev/null || true
+  kill $DPID $MPID $CPID $XPID 2>/dev/null || true
   rm -f "$FIFO"
 }
 trap cleanup EXIT
@@ -86,6 +86,14 @@ CPID=$!
 sleep 3
 node "$ROOT/src/wait-ready.js" || log "WARN: la página no marcó __streamReady"
 
+# Reels (opcional): si existe REELS_DIR, el director intercala videos cada REELS_EVERY s
+start_reels() {
+  [ -n "${REELS_DIR:-}" ] && [ -d "$REELS_DIR" ] || return 0
+  export REELS_DIR REELS_EVERY REELS_MAX REELS_FIRST REELS_PORT
+  node "$ROOT/src/director.js" &
+  DPID=$!
+}
+
 # --- ffmpeg ---
 VIN=(-thread_queue_size 1024 -f x11grab -draw_mouse 0 -video_size "${W}x${H}" -framerate "$FPS" -i "$DISPLAY")
 AIN=(-thread_queue_size 1024 -f s16le -ar 44100 -ac 2 -i "$FIFO")
@@ -110,7 +118,7 @@ case "$MODE" in
     ;;
   rec)
     mkdir -p "$OUT_DIR"
-    start_music
+    start_music; start_reels
     ffmpeg -hide_banner -y "${VIN[@]}" "${AIN[@]}" "${VENC[@]}" "${AENC[@]}" \
       -t "${DUR:-25}" "$OUT_DIR/test.mp4"
     log "OK -> $OUT_DIR/test.mp4"
@@ -118,7 +126,7 @@ case "$MODE" in
   live)
     : "${RTMP_URL:?falta RTMP_URL (ver $ENV_FILE)}"
     : "${RTMP_KEY:?falta RTMP_KEY (ver $ENV_FILE)}"
-    start_music
+    start_music; start_reels
     ffmpeg -hide_banner "${VIN[@]}" "${AIN[@]}" "${VENC[@]}" "${AENC[@]}" \
       -f flv "${RTMP_URL%/}/${RTMP_KEY}"
     ;;

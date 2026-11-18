@@ -93,6 +93,19 @@ TGSTREAM_HOST=usuario@servidor ./scripts/sync-music.sh     # sube ./music (o MUS
 
 Usa música con licencia comercial y sin atribución obligatoria, por ejemplo [Pixabay Music](https://pixabay.com/music/).
 
+## Reels
+
+Cada `REELS_EVERY` segundos (10 min por defecto) el live corta a un video al azar de `/srv/tgstream/reels`, a pantalla completa, y luego vuelve a la página. Los reels se ven **sin su audio**: la música sigue sonando.
+
+```bash
+# en el servidor, una vez: activar en /etc/tgstream/tgstream.env y reiniciar
+REELS_DIR=/srv/tgstream/reels
+# desde tu computadora: prepara (1080x1920, 30 fps, H.264) y sube ./reels (o REELS_SRC)
+TGSTREAM_HOST=usuario@servidor ./scripts/sync-reels.sh
+```
+
+Cómo funciona: `src/director.js` abre una segunda pestaña con un reproductor servido desde `127.0.0.1` y alterna la pestaña visible por CDP. No toca tu página, así que da igual su CSP o su código, y la página sigue actualizándose por detrás. La carpeta se relee antes de cada reel.
+
 ## La página
 
 Chrome la abre con un viewport de **540x960** a escala 2 (= 1080x1920), con User-Agent de móvil y **sin GPU**. Lo que la hace ir a 60 fps y aguantar días:
@@ -116,6 +129,9 @@ Chrome la abre con un viewport de **540x960** a escala 2 (= 1080x1920), con User
 | `FPS` | `60` | Bájalo a 30 si `speed` queda por debajo de 1x |
 | `VIDEO_BITRATE` / `AUDIO_BITRATE` | `5000k` / `160k` | Siempre en `k` |
 | `MUSIC_DIR` / `MUSIC_LUFS` | `/srv/tgstream/music` / `-16` | `-14` más alto, `-20` más bajo |
+| `REELS_DIR` | vacío | Carpeta de reels. Vacío = sin reels |
+| `REELS_EVERY` / `REELS_MAX` | `600` / `60` | Segundos de página entre reels / duración máxima de un reel |
+| `REELS_FIRST` / `REELS_PORT` | `REELS_EVERY` / `8790` | Espera antes del primer reel / puerto local del reproductor |
 | `DISPLAY_NUM` / `CDP_PORT` | `99` / `9222` | Solo si corres más de un stream en el mismo servidor |
 
 `/etc/tgstream/keeper.env` (ver `keeper/keeper.env.example`):

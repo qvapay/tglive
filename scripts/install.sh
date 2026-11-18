@@ -10,6 +10,7 @@ REPO="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
 PREFIX="/opt/tgstream"
 ETC="/etc/tgstream"
 MUSIC_DIR="/srv/tgstream/music"
+REELS_DIR="/srv/tgstream/reels"
 KEEPER_STATE="/var/lib/tgstream-keeper"
 SVC_USER="tgstream"
 OWNER="${SUDO_USER:-root}"   # dueño de la carpeta de música (quien sube con rsync)
@@ -43,7 +44,7 @@ mkdir -p "$PREFIX"
 if [ "$REPO" != "$PREFIX" ]; then
   rsync -a --delete \
     --exclude .git --exclude node_modules --exclude .venv --exclude .env \
-    --exclude .DS_Store --exclude music --exclude '*.session' \
+    --exclude .DS_Store --exclude music --exclude reels --exclude '*.session' \
     "$REPO/" "$PREFIX/"
 fi
 chown -R root:root "$PREFIX"
@@ -87,6 +88,7 @@ grep -q '^TG_API_ID=[0-9]' "$ETC/keeper.env" || warn "Falta TG_API_ID / TG_API_H
 
 # 6. Carpetas de datos
 [ -d "$MUSIC_DIR" ] || { say "Carpeta de música $MUSIC_DIR"; install -d -m 2775 -o "$OWNER" -g "$SVC_USER" "$MUSIC_DIR"; }
+[ -d "$REELS_DIR" ] || { say "Carpeta de reels $REELS_DIR"; install -d -m 2775 -o "$OWNER" -g "$SVC_USER" "$REELS_DIR"; }
 install -d -m 700 -o "$SVC_USER" -g "$SVC_USER" "$KEEPER_STATE"
 
 # 7. El keeper puede reiniciar el stream (y nada más)
