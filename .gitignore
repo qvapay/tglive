@@ -9,3 +9,4 @@ reels/
 *.mp3
 *.png
 .DS_Store
+__pycache__/
